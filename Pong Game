@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pong Game</title>
+    <style>
+        canvas {
+            background-color: black;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="pong" width="800" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById("pong");
+        const ctx = canvas.getContext("2d");
+
+        // Paddle and ball variables
+        let paddleWidth = 10;
+        let paddleHeight = 100;
+        let playerY = canvas.height / 2 - paddleHeight / 2;
+        let opponentY = canvas.height / 2 - paddleHeight / 2;
+        let ballX = canvas.width / 2;
+        let ballY = canvas.height / 2;
+        let ballSpeedX = 10;
+        let ballSpeedY = 3;
+        let playerScore = 0;
+        let opponentScore = 0;
+
+        // Paddle controls
+        canvas.addEventListener("mousemove", function (event) {
+            let mouseY = event.clientY - canvas.getBoundingClientRect().top;
+            playerY = mouseY - paddleHeight / 2;
+        });
+
+        // Game loop
+        function gameLoop() {
+            move();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Move objects
+        function move() {
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            // Ball collisions with top and bottom walls
+            if (ballY < 0 || ballY > canvas.height) {
+                ballSpeedY = -ballSpeedY;
+            }
+
+            // Ball collisions with paddles
+            if (
+                ballX < paddleWidth &&
+                ballY > playerY &&
+                ballY < playerY + paddleHeight
+            ) {
+                ballSpeedX = -ballSpeedX;
+                playerScore++;
+            }
+
+            if (
+                ballX > canvas.width - paddleWidth &&
+                ballY > opponentY &&
+                ballY < opponentY + paddleHeight
+            ) {
+                ballSpeedX = -ballSpeedX;
+                opponentScore++;
+            }
+
+            // Ball out of bounds (score)
+            if (ballX < 0 || ballX > canvas.width) {
+                ballX = canvas.width / 2;
+                ballY = canvas.height / 2;
+                ballSpeedX = -ballSpeedX;
+            }
+        }
+
+        // Draw objects
+        function draw() {
+            // Clear the canvas
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw paddles
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, playerY, paddleWidth, paddleHeight);
+            ctx.fillRect(
+                canvas.width - paddleWidth,
+                opponentY,
+                paddleWidth,
+                paddleHeight
+            );
+
+            // Draw the ball
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, 10, 0, Math.PI * 2, false);
+            ctx.fill();
+
+            // Display scores
+            ctx.font = "30px Arial";
+            ctx.fillText(`Player: ${playerScore}`, 50, 50);
+            ctx.fillText(`Opponent: ${opponentScore}`, canvas.width - 200, 50);
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>
